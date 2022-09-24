@@ -10,9 +10,13 @@ build:
 build-wasm:
 	GOOS=js GOARCH=wasm go build -o bin/asciidonut.wasm
 
+.PHONY: build-tiny-wasm
+build-tiny-wasm:
+	tinygo build -o bin/asciidonut.wasm -target wasm
+
 .PHONY: copy
 copy:
-	cp bin/asciidonut.wasm web/assets/wasm/
+	cp bin/asciidonut.wasm docs/assets/wasm/
 
 .PHONY: serve
 serve:

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"math"
-	"strings"
-	"syscall/js"
+	// "strings"
+	// "syscall/js"
 )
 
 type Vec3 struct {
@@ -101,7 +101,7 @@ const (
 
 var (
 	ASCII    = []byte{' ', '.', ',', '-', '+', '*', 'o', '0', '@', '#'}
-	BUFFER_1 = [H][W]byte{}
+	BUFFER_1 = [H][W + 1]byte{}
 )
 
 // func sphere_sd(p Vec3, r float64) float64 {
@@ -188,7 +188,19 @@ func calc_pixel_color(x, y, t float64) float64 {
 	return Ip
 }
 
-func step(buffer [H][W]byte, t float64) {
+// func step(t float64) {
+// 	for y := 0; y < H; y++ {
+// 		for x := 0; x < W; x++ {
+// 			color := calc_pixel_color(float64(x), float64(y), t)
+// 			idx := int(10.0*color/256.0) % 10 // len(ASCII) == 10
+// 			// fmt.Println("color", color, "idx", idx)
+// 			BUFFER_1[y][x] = ASCII[idx]
+// 		}
+// 	}
+// }
+
+//go:export Step
+func Step(t float64) {
 	for y := 0; y < H; y++ {
 		for x := 0; x < W; x++ {
 			color := calc_pixel_color(float64(x), float64(y), t)
@@ -199,29 +211,37 @@ func step(buffer [H][W]byte, t float64) {
 	}
 }
 
-func draw(buffer [H][W]byte) {
-	for _, row := range buffer {
-		fmt.Println(string(row[:]))
-	}
-}
+// func draw(buffer [H][W]byte) {
+// 	for _, row := range buffer {
+// 		fmt.Println(string(row[:]))
+// 	}
+// }
 
-func CalculateDonut(_ js.Value, args []js.Value) interface{} {
-	t := args[0].Float()
-	step(BUFFER_1, t)
-	// sb := strings.Builder{}
-	ss := []string{}
-	for _, row := range BUFFER_1 {
-		ss = append(ss, string(row[:]))
-	}
-	return strings.Join(ss, "\n")
+// func CalculateDonut(_ js.Value, args []js.Value) interface{} {
+// 	t := args[0].Float()
+// 	step(BUFFER_1, t)
+// 	// sb := strings.Builder{}
+// 	ss := []string{}
+// 	for _, row := range BUFFER_1 {
+// 		ss = append(ss, string(row[:]))
+// 	}
+// 	return strings.Join(ss, "\n")
+// }
+
+//go:export GetBufferAddress
+func GetBufferAddress() *[H][W + 1]byte {
+	return &BUFFER_1
 }
 
 func main() {
-	js.Global().Set("CalculateDonut", js.FuncOf(CalculateDonut))
+	// js.Global().Set("CalculateDonut", js.FuncOf(CalculateDonut))
+	for i := range BUFFER_1 {
+		BUFFER_1[i][W] = '\n'
+	}
 	select {}
 	// t := 0.1
 	// for {
-	// 	step(BUFFER_1, t)
+	// 	step(t)
 	// 	draw(BUFFER_1)
 	// 	t += .1
 	// }
