@@ -21,3 +21,11 @@ copy:
 .PHONY: serve
 serve:
 	cd docs/ && python3 -m http.server 8080
+
+.PHONY: benchmark
+benchmark:
+	go test -cpuprofile profiles/cpu.prof -memprofile profiles/mem.prof -bench . ./utils
+
+.PHONY: visualize-benchmark
+visualize-benchmark:
+	go tool pprof -http=: profiles/cpu.prof

@@ -28,7 +28,8 @@ async function main() {
 
     let last_t = null;
     const TIME_STEP = 1;
-    function draw(t) {
+    function draw(_t) {
+        t = _t*10 +  20000.0;
         requestAnimationFrame(draw);
         if (!last_t) last_t = t;
         const delta_t = t - last_t;
