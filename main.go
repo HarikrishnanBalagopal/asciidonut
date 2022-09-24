@@ -30,6 +30,10 @@ func (v Vec3) Normalize() Vec3 {
 	return Vec3{X: v.X / l, Y: v.Y / l, Z: v.Z / l}
 }
 
+func (v1 Vec3) Dot(v2 Vec3) float64 {
+	return v1.X*v2.X + v1.Y*v2.Y + v1.Z*v2.Z
+}
+
 func (v1 Vec3) Cross(v2 Vec3) Vec3 {
 	return Vec3{X: v1.Y*v2.Z - v1.Z*v2.Y, Y: v1.Z*v2.X - v1.X*v2.Z, Z: v1.X*v2.Y - v1.Y*v2.X}
 }
@@ -83,7 +87,14 @@ const (
 	W              = N * 2
 	H              = N
 	MAX_ITERATIONS = N
-	EPS            = .001
+	EPS            = 0.001
+	// https://en.wikipedia.org/wiki/Phong_reflection_model
+	AMBIENT_REFLECTION_CONSTANT = 0.05
+	AMBIENT_LIGHT_INTENSITY     = 255.0
+	DIFFUSE_REFLECTION_CONSTANT = 0.95
+	DIFFUSE_LIGHT_INTENSITY     = 255.0
+	// SPECULAR_REFLECTION_CONSTANT = 0.1
+	// MATERIAL_SHININESS_CONSTANT = 0.1
 )
 
 var (
@@ -102,9 +113,27 @@ func torus_sd(p Vec3, tx, ty float64) float64 {
 
 func scene_sd(p Vec3, t float64) float64 {
 	p1 := Mat3x3{}.Rot(Vec3{1, 0, 0}, t).Mul(p)
-	d := torus_sd(p1, 2., .5)
+	// p1 := Mat3x3{}.Rot(Vec3{1, 1, math.Sin(7 * t)}.Normalize(), 10*t).Mul(p)
+	d := torus_sd(p1, 2., .75)
 	// d := sphere_sd(p, 1.)
 	return d
+}
+
+func normals_sd(p Vec3, t float64) Vec3 {
+	dx1 := scene_sd(p.Add(Vec3{EPS, 0, 0}), t)
+	dx2 := scene_sd(p.Add(Vec3{-EPS, 0, 0}), t)
+
+	dy1 := scene_sd(p.Add(Vec3{0, EPS, 0}), t)
+	dy2 := scene_sd(p.Add(Vec3{0, -EPS, 0}), t)
+
+	dz1 := scene_sd(p.Add(Vec3{0, 0, EPS}), t)
+	dz2 := scene_sd(p.Add(Vec3{0, 0, -EPS}), t)
+
+	return Vec3{
+		X: dx2 - dx1/2*EPS,
+		Y: dy2 - dy1/2*EPS,
+		Z: dz2 - dz1/2*EPS,
+	}.Normalize()
 }
 
 func calc_pixel_color(x, y, t float64) float64 {
@@ -122,20 +151,39 @@ func calc_pixel_color(x, y, t float64) float64 {
 	cam_right := cam_dir.Cross(vec_up).Normalize()
 	cam_up := cam_right.Cross(cam_dir).Normalize()
 	screen_pos := screen_cen.Add(cam_right.Scale(nx)).Add(cam_up.Scale(ny))
+	light_pos := Vec3{0, 4, 2}
 
 	ray_dir := screen_pos.Sub(cam_pos).Normalize()
 
 	p := cam_pos
+	d := 10000.0
 	for i := 0; i < MAX_ITERATIONS; i++ {
-		d := scene_sd(p, t)
+		d = scene_sd(p, t)
 		if d < EPS {
 			// fmt.Println("***************************************")
-			return 255.
+			break
 		}
 		p = p.Add(ray_dir.Scale(d))
 	}
+
 	// fmt.Println("...")
-	return 50.
+
+	if d >= EPS {
+		return 0.
+	}
+
+	// https://en.wikipedia.org/wiki/Phong_reflection_model
+	normal := normals_sd(p, t)
+	light_dir := light_pos.Sub(p).Normalize()
+
+	dot := light_dir.Dot(normal)
+	if dot < 0 {
+		dot = 0
+	}
+	//	dot2 := 0
+	Ip := AMBIENT_REFLECTION_CONSTANT*AMBIENT_LIGHT_INTENSITY + DIFFUSE_REFLECTION_CONSTANT*(dot)*DIFFUSE_LIGHT_INTENSITY //+ Ks*pow(dot2,alpha)*Ims
+	// fmt.Println("Dot", dot, "Ip", Ip)
+	return Ip
 }
 
 func step(buffer [H][W]byte, t float64) {
@@ -160,6 +208,6 @@ func main() {
 	for {
 		step(BUFFER_1, t)
 		draw(BUFFER_1)
-		t += .01
+		t += .1
 	}
 }
