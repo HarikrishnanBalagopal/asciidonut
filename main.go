@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"math"
+	"strings"
+	"syscall/js"
 )
 
 type Vec3 struct {
@@ -203,11 +205,24 @@ func draw(buffer [H][W]byte) {
 	}
 }
 
-func main() {
-	t := 0.1
-	for {
-		step(BUFFER_1, t)
-		draw(BUFFER_1)
-		t += .1
+func CalculateDonut(_ js.Value, args []js.Value) interface{} {
+	t := args[0].Float()
+	step(BUFFER_1, t)
+	// sb := strings.Builder{}
+	ss := []string{}
+	for _, row := range BUFFER_1 {
+		ss = append(ss, string(row[:]))
 	}
+	return strings.Join(ss, "\n")
+}
+
+func main() {
+	js.Global().Set("CalculateDonut", js.FuncOf(CalculateDonut))
+	select {}
+	// t := 0.1
+	// for {
+	// 	step(BUFFER_1, t)
+	// 	draw(BUFFER_1)
+	// 	t += .1
+	// }
 }
