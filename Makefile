@@ -16,4 +16,4 @@ copy:
 
 .PHONY: serve
 serve:
-	cd web/ && python3 -m http.server 8080
+	cd docs/ && python3 -m http.server 8080
