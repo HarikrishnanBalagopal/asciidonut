@@ -14,34 +14,59 @@
             margin: 0;
             padding-top: 1em;
         }
+
         a {
             font-family: monospace;
             color: white;
         }
+
         .controls {
             display: flex;
         }
+
         .controls>button {
             width: 6em;
             font-size: 2em;
             text-align: start;
             font-family: monospace;
         }
+
         .hidden {
             display: none;
+        }
+
+        pre {
+            width: 100vw;
+            font-size: .75em;
+        }
+
+        .word-break {
+            word-wrap: break-word;
+        }
+
+        .width-82 {
+            display: block;
+            max-width: 82%;
+        }
+
+        @media (min-width: 640px) {
+            pre {
+                width: 100vw;
+                font-size: 1em;
+            }
         }
     </style>
 </head>
 
 <body>
-    <a target="_blank"
+    <a target="_blank" class="width-82 word-break"
         href="https://github.com/HarikrishnanBalagopal/asciidonut">https://github.com/HarikrishnanBalagopal/asciidonut</a>
     <pre id="output-pre"></pre>
     <div class="controls">
         <button id="button-play-pause">⏸ Pause</button>
         <button id="button-copy">⎘ Copy</button>
-        <div id="copy-alert" class="hidden">Copied to clipboard!</div>
     </div>
+    <div id="copy-alert" class="hidden">Copied to clipboard!</div>
     <!-- <script src="assets/js/wasm_exec.js"></script> -->
     <script src="assets/js/main.js" type="module"></script>
 </body>
