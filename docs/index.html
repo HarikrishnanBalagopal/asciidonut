@@ -10,10 +10,25 @@
         body {
             background-color: black;
             color: white;
+            font-family: monospace;
+            margin: 0;
+            padding-top: 1em;
         }
         a {
             font-family: monospace;
             color: white;
+        }
+        .controls {
+            display: flex;
+        }
+        .controls>button {
+            width: 6em;
+            font-size: 2em;
+            text-align: start;
+            font-family: monospace;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -22,8 +37,13 @@
     <a target="_blank"
         href="https://github.com/HarikrishnanBalagopal/asciidonut">https://github.com/HarikrishnanBalagopal/asciidonut</a>
     <pre id="output-pre"></pre>
-    <script src="assets/js/wasm_exec.js"></script>
-    <script src="assets/js/main.js"></script>
+    <div class="controls">
+        <button id="button-play-pause">⏸ Pause</button>
+        <button id="button-copy">⎘ Copy</button>
+        <div id="copy-alert" class="hidden">Copied to clipboard!</div>
+    </div>
+    <!-- <script src="assets/js/wasm_exec.js"></script> -->
+    <script src="assets/js/main.js" type="module"></script>
 </body>
 
 </html>
